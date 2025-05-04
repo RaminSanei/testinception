@@ -1,0 +1,37 @@
+# =============================================
+# WordPress PHP-FPM Dockerfile
+# Base image configuration
+ARG BASE_IMAGE=debian:buster
+FROM ${BASE_IMAGE}
+# =============================================
+# Environment Variables
+ENV WWW_ROOT="/var/www/html" \
+    PHP_RUN_DIR="/run/php" \
+    WP_CLI_URL="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" \
+    WP_CLI_PATH="/usr/local/bin/wp"
+
+# =============================================
+# Package Installation
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y php php7.3-fpm php-mysql \
+    curl && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# =============================================
+# Filesystem Setup
+RUN mkdir -p ${WWW_ROOT} ${PHP_RUN_DIR} && \
+    chown -R www-data:www-data ${WWW_ROOT} ${PHP_RUN_DIR} && \
+    chmod -R 755 ${WWW_ROOT}
+
+# =============================================
+# WP-CLI Installation
+RUN curl -O ${WP_CLI_URL} && chmod +x wp-cli.phar && mv wp-cli.phar ${WP_CLI_PATH}
+# =============================================
+# Application Setup
+COPY wrun.sh /usr/local/bin/wrun.sh
+RUN chmod +x /usr/local/bin/wrun.sh
+WORKDIR ${WWW_ROOT}
+#=============================================
+# Runtime Configuration
+ENTRYPOINT ["/usr/local/bin/wrun.sh"]
+# =============================================

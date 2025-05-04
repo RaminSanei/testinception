@@ -1,0 +1,24 @@
+# =============================================
+# MariaDB Dockerfile
+# Use Debian Buster as the base image
+FROM debian:buster
+# --------------------------------------------------
+# Package Installation
+RUN apt-get update && \
+    apt-get install -y mariadb-server openssl && \
+    apt-get clean
+# --------------------------------------------------
+# Configuration and Script
+COPY ./mrun.sh /mrun.sh
+# Make the initialization script executable
+RUN chmod +x /mrun.sh
+# --------------------------------------------------
+# Network Configuration
+# Expose the default MySQL/MariaDB port (3306)
+EXPOSE 3306
+# --------------------------------------------------
+# Container Startup
+# --------------------------------------------------
+# Set the initialization script as the default command
+# This runs when the container starts
+CMD ["sh", "/mrun.sh"]
